@@ -1,3 +1,7 @@
+# cpp
+[bB]uild
+.cache
+
 # nix
 .direnv
 result
