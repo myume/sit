@@ -1,6 +1,7 @@
 # cpp
 [bB]uild
 .cache
+Testing
 
 # nix
 .direnv
