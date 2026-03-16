@@ -22,6 +22,8 @@ class Image {
 
     void Transpose();
 
+    void HorizontalFlip();
+
   private:
     int height, width;
     int channels;

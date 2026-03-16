@@ -2,16 +2,20 @@
 #include <catch2/catch_test_macros.hpp>
 #include <vector>
 
-TEST_CASE("Image pixel aggregation", "[image]") {
-    int height = 2, width = 2, channels = 3;
+Image constructImage(int height, int width, int channels = 3) {
     std::unique_ptr<stbi_uc[], decltype(&stbi_image_free)> pixels{
         static_cast<stbi_uc*>(malloc(height * width * channels)),
         stbi_image_free};
-
     for (int i = 0; i < height * width * channels; ++i) {
         pixels[i] = i;
     }
     Image image(std::move(pixels), height, width, channels);
+    return image;
+}
+
+TEST_CASE("Image pixel aggregation", "[image]") {
+    int height = 2, width = 2;
+    Image image = constructImage(height, width);
     std::vector<std::vector<stbi_uc>> expected = {
         {0, 1, 2},
         {3, 4, 5},
@@ -23,16 +27,8 @@ TEST_CASE("Image pixel aggregation", "[image]") {
 
 TEST_CASE("Image Tranposition", "[image]") {
     SECTION("Square Images") {
-        int height = 2, width = 2, channels = 3;
-        std::unique_ptr<stbi_uc[], decltype(&stbi_image_free)> pixels{
-            static_cast<stbi_uc*>(malloc(height * width * channels)),
-            stbi_image_free};
-
-        for (int i = 0; i < height * width * channels; ++i) {
-            pixels[i] = i;
-        }
-
-        Image image(std::move(pixels), height, width, channels);
+        int height = 2, width = 2;
+        Image image = constructImage(height, width);
         image.Transpose();
         std::vector<std::vector<stbi_uc>> expected = {
             {0, 1, 2},
@@ -44,16 +40,8 @@ TEST_CASE("Image Tranposition", "[image]") {
     }
 
     SECTION("Rectangle Images") {
-        int height = 2, width = 3, channels = 3;
-        std::unique_ptr<stbi_uc[], decltype(&stbi_image_free)> pixels{
-            static_cast<stbi_uc*>(malloc(height * width * channels)),
-            stbi_image_free};
-
-        for (int i = 0; i < height * width * channels; ++i) {
-            pixels[i] = i;
-        }
-
-        Image image(std::move(pixels), height, width, channels);
+        int height = 2, width = 3;
+        Image image = constructImage(height, width);
         image.Transpose();
         std::vector<std::vector<stbi_uc>> expected = {{0, 1, 2}, {9, 10, 11},
                                                       {3, 4, 5}, {12, 13, 14},
@@ -61,5 +49,19 @@ TEST_CASE("Image Tranposition", "[image]") {
         REQUIRE(image.Pixels() == expected);
         REQUIRE(image.Height() == width);
         REQUIRE(image.Width() == height);
+    }
+}
+
+TEST_CASE("Image Flip", "[image]") {
+    SECTION("Horizontal Flip") {
+        int height = 3, width = 2;
+        Image image = constructImage(height, width);
+        image.HorizontalFlip();
+        std::vector<std::vector<stbi_uc>> expected = {
+            {3, 4, 5}, {0, 1, 2},    {9, 10, 11},
+            {6, 7, 8}, {15, 16, 17}, {12, 13, 14},
+        };
+
+        REQUIRE(image.Pixels() == expected);
     }
 }

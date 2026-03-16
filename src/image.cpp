@@ -56,3 +56,17 @@ void Image::Transpose() {
         pixels.reset(output);
     }
 };
+
+void Image::HorizontalFlip() {
+    for (int y = 0; y < height; ++y) {
+        int start = y * width * channels;
+        int end = ((y + 1) * width - 1) * channels;
+        while (start < end) {
+            for (int i = 0; i < channels; ++i) {
+                std::swap(pixels[start + i], pixels[end + i]);
+            }
+            start += channels;
+            end -= channels;
+        }
+    }
+};
