@@ -70,3 +70,8 @@ void Image::HorizontalFlip() {
         }
     }
 };
+
+void Image::RotateRight() {
+    Transpose();
+    HorizontalFlip();
+};

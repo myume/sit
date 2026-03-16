@@ -24,6 +24,8 @@ class Image {
 
     void HorizontalFlip();
 
+    void RotateRight();
+
   private:
     int height, width;
     int channels;
