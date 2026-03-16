@@ -8,15 +8,9 @@ class Image {
   public:
     explicit Image(const std::filesystem::path& path);
 
-    Image(const Image& image);
-
-    Image& operator=(const Image& image);
-
-    Image& operator=(Image&& image);
-
-    Image(Image&& image) noexcept;
-
-    ~Image();
+    explicit Image(
+        std::unique_ptr<stbi_uc[], decltype(&stbi_image_free)> pixels,
+        int height, int width, int channels);
 
     int Height() const;
 
@@ -32,5 +26,5 @@ class Image {
     int height, width;
     int channels;
 
-    stbi_uc* pixels;
+    std::unique_ptr<stbi_uc[], decltype(&stbi_image_free)> pixels;
 };

@@ -17,3 +17,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(stb)
 add_library(stb_image INTERFACE)
 target_include_directories(stb_image INTERFACE ${stb_SOURCE_DIR})
+
+if (TEST)
+    add_subdirectory(tests)
+endif()
