@@ -1,4 +1,6 @@
 #include <format>
+#include <string_view>
+#include <unordered_map>
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
@@ -49,6 +51,8 @@ void Image::Transpose() {
     for (int y = 0; y < height; ++y) {
         for (int x = (height == width) * (y + 1); x < width; ++x) {
             for (int i = 0; i < channels; i++) {
+                // output will have garbage in it, but we'll be throwing away
+                // the old pixels after so it's fine.
                 std::swap(output[(x * height + y) * channels + i],
                           pixels[(y * width + x) * channels + i]);
             }
@@ -97,4 +101,25 @@ void Image::Save(const std::filesystem::path& path) {
     if (!exitCode) {
         throw std::runtime_error("failed to write file");
     }
+};
+
+Transformation parseTransformation(std::string_view s) {
+    static const std::unordered_map<std::string_view, Transformation> mapping =
+        {
+            {"transpose", Transformation::Transpose},
+            {"rotate_right", Transformation::RotateRight},
+            {"horizontal_flip", Transformation::HorizontalFlip},
+        };
+
+    if (!mapping.contains(s)) {
+        std::string message = std::format("Invalid transformation \"{}\"", s);
+        message += "\n\nValid transformations:";
+        for (const auto& [key, _] : mapping) {
+            message += "\n - ";
+            message += key;
+        }
+        throw std::runtime_error(message);
+    }
+
+    return mapping.at(s);
 };

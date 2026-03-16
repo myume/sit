@@ -2,6 +2,7 @@
 #include "stb_image.h"
 
 #include <filesystem>
+#include <string_view>
 #include <vector>
 
 class Image {
@@ -34,3 +35,11 @@ class Image {
 
     std::unique_ptr<stbi_uc[], decltype(&stbi_image_free)> pixels;
 };
+
+enum class Transformation {
+    Transpose,
+    HorizontalFlip,
+    RotateRight,
+};
+
+Transformation parseTransformation(std::string_view s);
