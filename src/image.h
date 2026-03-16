@@ -1,8 +1,8 @@
 #pragma once
-#define STB_IMAGE_IMPLEMENTATION
-#include <filesystem>
-
 #include "stb_image.h"
+
+#include <filesystem>
+#include <vector>
 
 class Image {
   public:
@@ -11,6 +11,7 @@ class Image {
     Image(const Image& image);
 
     Image& operator=(const Image& image);
+
     Image& operator=(Image&& image);
 
     Image(Image&& image) noexcept;
@@ -20,6 +21,12 @@ class Image {
     int Height() const;
 
     int Width() const;
+
+    int Channels() const;
+
+    std::vector<std::vector<stbi_uc>> Pixels() const;
+
+    void Transpose();
 
   private:
     int height, width;

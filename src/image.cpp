@@ -1,6 +1,9 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "image.h"
 
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
 #include <stdexcept>
 #include <utility>
@@ -65,3 +68,41 @@ Image& Image::operator=(Image&& other) {
 int Image::Width() const { return width; };
 
 int Image::Height() const { return height; };
+
+int Image::Channels() const { return channels; };
+
+std::vector<std::vector<stbi_uc>> Image::Pixels() const {
+    std::vector<std::vector<stbi_uc>> output;
+    output.reserve(height * width);
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            std::vector<stbi_uc> channel;
+            for (int i = 0; i < channels; ++i) {
+                channel.push_back(pixels[y * height + x + i]);
+            }
+            output.push_back(channel);
+        }
+    }
+    return output;
+};
+
+void Image::Transpose() {
+    stbi_uc* output =
+        (height != width)
+            ? static_cast<stbi_uc*>(malloc(height * width * channels))
+            : pixels;
+
+    for (int y = 0; y < height; ++y) {
+        for (int x = (height == width) * (y + 1); x < width; ++x) {
+            for (int i = 0; i < channels; i++) {
+                pixels[y * width + x + i] = output[x * height + y + i];
+            }
+        }
+    }
+
+    std::swap(height, width);
+    if (height != width) {
+        stbi_image_free(pixels);
+    }
+    pixels = output;
+};

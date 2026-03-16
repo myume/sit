@@ -11,4 +11,6 @@ int main(int argc, char** argv) {
     Image image(argv[1]);
 
     std::println("Loaded image: {}x{}", image.Width(), image.Height());
+
+    std::println("{}", image.Pixels()[0]);
 }
