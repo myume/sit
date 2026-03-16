@@ -25,5 +25,6 @@ int main(int argc, char** argv) {
         image.Save(output.empty() ? filename : output);
     } catch (std::exception& e) {
         std::println("Failed to save image: {}", e.what());
+        return -1;
     }
 }
