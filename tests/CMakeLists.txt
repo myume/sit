@@ -11,6 +11,7 @@ FetchContent_MakeAvailable(Catch2)
 add_executable(tests 
   image.cpp
 )
-
 target_link_libraries(tests PRIVATE core)
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
+
+add_test(NAME tests COMMAND tests)

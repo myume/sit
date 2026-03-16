@@ -29,5 +29,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(cli11_proj)
 
 if (TEST)
+    enable_testing()
     add_subdirectory(tests)
 endif()
