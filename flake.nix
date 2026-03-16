@@ -1,5 +1,5 @@
 {
-  description = "Looker Full Text Search Engine";
+  description = "Simple Image Transformer";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-unstable";
 

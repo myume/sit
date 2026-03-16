@@ -1,14 +1,29 @@
+#include "CLI/CLI.hpp"
+#include <exception>
 #include <print>
 
 #include "image.h"
 
 int main(int argc, char** argv) {
-    if (argc < 2) {
-        std::println(stderr, "Usage: sit <image_path>");
-        return -1;
-    }
+    CLI::App app{"Simple Image Transformer", "sit"};
 
-    Image image(argv[1]);
+    std::string filename;
+    app.add_option("image_file", filename, "Path to image")
+        ->check(CLI::ExistingFile)
+        ->required();
+
+    std::string output;
+    app.add_option("-o,--output", output, "Path to output resulting image");
+
+    CLI11_PARSE(app, argc, argv);
+
+    Image image(filename);
 
     std::println("Loaded image: {}x{}", image.Width(), image.Height());
+
+    try {
+        image.Save(output.empty() ? filename : output);
+    } catch (std::exception& e) {
+        std::println("Failed to save image: {}", e.what());
+    }
 }

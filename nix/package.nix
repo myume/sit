@@ -3,19 +3,15 @@
   lib,
 }:
 stdenv.mkDerivation {
-  pname = "package";
+  pname = "sit";
   version = "1.2.3";
   src = ../.;
   buildInputs = [
   ];
 
   meta = {
-    description = "A program that does something";
-    longDescription = ''
-      Let's hope this program continues to do that something,
-      forever.
-    '';
-    homepage = "https://example.com";
+    description = "Simple Image Transformer";
+    homepage = "https://github.com/myume/sit";
     license = lib.licenses.mit;
     maintainers = with lib.maintainers; [you];
     platforms = lib.platforms.all;

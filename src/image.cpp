@@ -1,5 +1,9 @@
+#include <format>
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+
 #include "image.h"
+#include "stb_image_write.h"
 
 #include <stdexcept>
 #include <utility>
@@ -74,4 +78,23 @@ void Image::HorizontalFlip() {
 void Image::RotateRight() {
     Transpose();
     HorizontalFlip();
+};
+
+void Image::Save(const std::filesystem::path& path) {
+    auto ext = path.extension();
+    int exitCode = 1;
+    if (ext == ".jpg") {
+        exitCode = stbi_write_jpg(path.c_str(), width, height, channels,
+                                  pixels.get(), 90);
+    } else if (ext == ".png") {
+        exitCode = stbi_write_png(path.c_str(), width, height, channels,
+                                  pixels.get(), width * channels);
+    } else {
+        throw std::runtime_error(
+            std::format("{} files are unsupported", ext.string()));
+    }
+
+    if (!exitCode) {
+        throw std::runtime_error("failed to write file");
+    }
 };

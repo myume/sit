@@ -26,6 +26,8 @@ class Image {
 
     void RotateRight();
 
+    void Save(const std::filesystem::path& path);
+
   private:
     int height, width;
     int channels;
