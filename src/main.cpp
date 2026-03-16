@@ -17,8 +17,14 @@ int main(int argc, char** argv) {
     app.add_option("-o,--output", output, "Path to output resulting image");
 
     std::vector<std::string> transformations;
-    app.add_option("-t,--transformations", transformations,
+    app.add_option("-t,--transform", transformations,
                    "Transformations to perform in order");
+
+    int blurRadius = 16;
+    app.add_option("--blur-radius", blurRadius, "Blur radius");
+
+    int blurPasses = 1;
+    app.add_option("--blur-pass", blurPasses, "Number of blur passes");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -39,6 +45,9 @@ int main(int argc, char** argv) {
             case Transformation::RotateRight:
                 image.RotateRight();
                 break;
+            case Transformation::BoxBlur:
+                image.BoxBlur(blurRadius, blurPasses);
+                break;
             }
         } catch (std::exception& e) {
             std::println(stderr, "{}", e.what());
@@ -48,7 +57,7 @@ int main(int argc, char** argv) {
 
     try {
         output = output.empty() ? sourcePath.filename() : output;
-        std::println(stderr, "Saving transformed image to {}", output.string());
+        std::println(stderr, "Saving image to {}", output.string());
         image.Save(output);
     } catch (std::exception& e) {
         std::println(stderr, "Failed to save image: {}", e.what());

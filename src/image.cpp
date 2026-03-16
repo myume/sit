@@ -1,14 +1,14 @@
-#include <format>
-#include <string_view>
-#include <unordered_map>
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-
 #include "image.h"
 #include "stb_image_write.h"
 
+#include <cstdlib>
+#include <format>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
+#include <vector>
 
 Image::Image(const std::filesystem::path& path)
     : pixels(nullptr, stbi_image_free) {
@@ -103,23 +103,45 @@ void Image::Save(const std::filesystem::path& path) {
     }
 };
 
-Transformation parseTransformation(std::string_view s) {
-    static const std::unordered_map<std::string_view, Transformation> mapping =
-        {
-            {"transpose", Transformation::Transpose},
-            {"rotate_right", Transformation::RotateRight},
-            {"horizontal_flip", Transformation::HorizontalFlip},
-        };
+std::vector<int> Image::sampleSquare(int x, int y, int radius) {
+    std::vector<int> vals(channels);
 
-    if (!mapping.contains(s)) {
-        std::string message = std::format("Invalid transformation \"{}\"", s);
-        message += "\n\nValid transformations:";
-        for (const auto& [key, _] : mapping) {
-            message += "\n - ";
-            message += key;
+    int yStart = std::max(y - radius, 0);
+    int yEnd = std::min(y + radius, height - 1);
+    int xStart = std::max(x - radius, 0);
+    int xEnd = std::min(x + radius, width - 1);
+
+    // accumulate the pixel values
+    int pixelCount = 0;
+    for (int i = yStart; i <= yEnd; ++i) {
+        for (int j = xStart; j <= xEnd; ++j) {
+            for (int k = 0; k < channels; ++k) {
+                vals[k] += pixels[(i * width + j) * channels + k];
+            }
+            pixelCount++;
         }
-        throw std::runtime_error(message);
     }
 
-    return mapping.at(s);
+    // normalize the values (averaging)
+    for (int i = 0; i < vals.size(); ++i) {
+        vals[i] = vals[i] / ((yEnd - yStart + 1) * (xEnd - xStart + 1));
+    }
+
+    return vals;
+};
+
+void Image::BoxBlur(int radius, int passes) {
+    for (int pass = 0; pass < passes; ++pass) {
+        stbi_uc* output =
+            static_cast<stbi_uc*>(malloc(height * width * channels));
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                std::vector<int> sample = sampleSquare(x, y, radius);
+                for (int i = 0; i < channels; ++i) {
+                    output[(y * width + x) * channels + i] = sample[i];
+                }
+            }
+        }
+        pixels.reset(output);
+    }
 };
