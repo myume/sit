@@ -11,6 +11,11 @@ FetchContent_MakeAvailable(Catch2)
 add_executable(tests 
   image.cpp
 )
+
+target_compile_definitions(tests PRIVATE
+    TEST_FIXTURES_DIR="${CMAKE_SOURCE_DIR}/tests/fixtures"
+)
+
 target_link_libraries(tests PRIVATE core)
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
 
