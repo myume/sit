@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <cstring>
 #include <format>
 #include <stdexcept>
 #include <string_view>
@@ -23,6 +24,16 @@ Image::Image(std::unique_ptr<stbi_uc[], decltype(&stbi_image_free)> img,
              int height, int width, int channels)
     : pixels(std::move(img)), height(height), width(width), channels(channels) {
 }
+
+Image::Image(const Image& other)
+    : height(other.height), width(other.width), channels(other.channels),
+      pixels(static_cast<stbi_uc*>(
+                 malloc(other.height * other.width * other.channels)),
+             stbi_image_free) {
+    memcpy(pixels.get(), other.pixels.get(), height * width * channels);
+};
+
+Image Image::operator=(const Image& other) { return Image(other); };
 
 int Image::Width() const { return width; };
 
