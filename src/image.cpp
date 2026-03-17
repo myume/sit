@@ -3,6 +3,7 @@
 #include "image.h"
 #include "stb_image_write.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <format>
 #include <stdexcept>
@@ -103,22 +104,20 @@ void Image::Save(const std::filesystem::path& path) {
     }
 };
 
-std::vector<int> Image::sampleSquare(int x, int y, int radius) {
+std::vector<int> Image::sampleSquare(int x, int y, int size) {
     std::vector<int> vals(channels);
 
-    int yStart = std::max(y - radius, 0);
-    int yEnd = std::min(y + radius, height - 1);
-    int xStart = std::max(x - radius, 0);
-    int xEnd = std::min(x + radius, width - 1);
+    int yStart = std::max(y - size, 0);
+    int yEnd = std::min(y + size, height - 1);
+    int xStart = std::max(x - size, 0);
+    int xEnd = std::min(x + size, width - 1);
 
     // accumulate the pixel values
-    int pixelCount = 0;
     for (int i = yStart; i <= yEnd; ++i) {
         for (int j = xStart; j <= xEnd; ++j) {
             for (int k = 0; k < channels; ++k) {
                 vals[k] += pixels[(i * width + j) * channels + k];
             }
-            pixelCount++;
         }
     }
 
@@ -130,13 +129,13 @@ std::vector<int> Image::sampleSquare(int x, int y, int radius) {
     return vals;
 };
 
-void Image::BoxBlur(int radius, int passes) {
+void Image::BoxBlur(int size, int passes) {
     for (int pass = 0; pass < passes; ++pass) {
         stbi_uc* output =
             static_cast<stbi_uc*>(malloc(height * width * channels));
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
-                std::vector<int> sample = sampleSquare(x, y, radius);
+                std::vector<int> sample = sampleSquare(x, y, size);
                 for (int i = 0; i < channels; ++i) {
                     output[(y * width + x) * channels + i] = sample[i];
                 }
@@ -144,4 +143,47 @@ void Image::BoxBlur(int radius, int passes) {
         }
         pixels.reset(output);
     }
+};
+
+inline float gaussian(float x, float y, float sigma) {
+    return exp(-(x * x + y * y) / (2 * sigma * sigma));
+}
+
+std::vector<float> Image::guassianSample(int x, int y, int size, float sigma) {
+    std::vector<float> vals(channels);
+
+    int yStart = std::max(y - size, 0);
+    int yEnd = std::min(y + size, height - 1);
+    int xStart = std::max(x - size, 0);
+    int xEnd = std::min(x + size, width - 1);
+
+    float weights = 0.0;
+    for (int i = yStart; i <= yEnd; ++i) {
+        for (int j = xStart; j <= xEnd; ++j) {
+            float weight = gaussian(y - i, x - j, sigma);
+            weights += weight;
+            for (int k = 0; k < channels; ++k) {
+                vals[k] += weight * pixels[(i * width + j) * channels + k];
+            }
+        }
+    }
+
+    for (int i = 0; i < channels; ++i) {
+        vals[i] = vals[i] / weights;
+    }
+
+    return vals;
+};
+
+void Image::GaussianBlur(int size, float sigma) {
+    stbi_uc* output = static_cast<stbi_uc*>(malloc(height * width * channels));
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            std::vector<float> sample = guassianSample(x, y, size, sigma);
+            for (int i = 0; i < channels; ++i) {
+                output[(y * width + x) * channels + i] = sample[i];
+            }
+        }
+    }
+    pixels.reset(output);
 };

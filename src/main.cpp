@@ -20,11 +20,14 @@ int main(int argc, char** argv) {
     app.add_option("-t,--transform", transformations,
                    "Transformations to perform in order");
 
-    int blurRadius = 16;
-    app.add_option("--blur-radius", blurRadius, "Blur radius");
+    int blurSize = 16;
+    app.add_option("--blur-size", blurSize, "Blur size");
 
     int blurPasses = 1;
     app.add_option("--blur-pass", blurPasses, "Number of blur passes");
+
+    float blurSigma = 3.0;
+    app.add_option("--blur-sigma", blurSigma, "Sigma for gaussian blur");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -46,7 +49,10 @@ int main(int argc, char** argv) {
                 image.RotateRight();
                 break;
             case Transformation::BoxBlur:
-                image.BoxBlur(blurRadius, blurPasses);
+                image.BoxBlur(blurSize, blurPasses);
+                break;
+            case Transformation::GaussianBlur:
+                image.GaussianBlur(blurSize, blurSigma);
                 break;
             }
         } catch (std::exception& e) {

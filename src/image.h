@@ -28,7 +28,9 @@ class Image {
 
     void RotateRight();
 
-    void BoxBlur(int radius, int passes);
+    void BoxBlur(int size, int passes);
+
+    void GaussianBlur(int size, float sigma);
 
     void Save(const std::filesystem::path& path);
 
@@ -38,7 +40,8 @@ class Image {
 
     std::unique_ptr<stbi_uc[], decltype(&stbi_image_free)> pixels;
 
-    std::vector<int> sampleSquare(int x, int y, int radius);
+    std::vector<int> sampleSquare(int x, int y, int size);
+    std::vector<float> guassianSample(int x, int y, int size, float sigma);
 };
 
 enum class Transformation {
@@ -46,6 +49,7 @@ enum class Transformation {
     HorizontalFlip,
     RotateRight,
     BoxBlur,
+    GaussianBlur,
 };
 
 inline Transformation parseTransformation(std::string_view s) {
@@ -55,6 +59,7 @@ inline Transformation parseTransformation(std::string_view s) {
             {"rotate_right", Transformation::RotateRight},
             {"horizontal_flip", Transformation::HorizontalFlip},
             {"box_blur", Transformation::BoxBlur},
+            {"gaussian_blur", Transformation::GaussianBlur},
         };
 
     if (!mapping.contains(s)) {
