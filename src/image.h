@@ -40,8 +40,8 @@ class Image {
 
     std::unique_ptr<stbi_uc[], decltype(&stbi_image_free)> pixels;
 
-    std::vector<int> sampleSquare(int x, int y, int size);
-    std::vector<float> guassianSample(int x, int y, int size, float sigma);
+    template <typename Fn>
+    std::vector<float> sampleSquare(int x, int y, int size, Fn weightFn);
 };
 
 enum class Transformation {
