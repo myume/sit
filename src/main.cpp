@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     app.add_option("--blur-size", blurSize, "Blur size");
 
     int blurPasses = 1;
-    app.add_option("--blur-pass", blurPasses, "Number of blur passes");
+    app.add_option("--blur-passes", blurPasses, "Number of blur passes");
 
     float blurSigma = 3.0;
     app.add_option("--blur-sigma", blurSigma, "Sigma for gaussian blur");
