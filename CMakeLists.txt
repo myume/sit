@@ -4,6 +4,7 @@ project(sit)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+add_compile_options(-O3)
 
 add_subdirectory(src)
 

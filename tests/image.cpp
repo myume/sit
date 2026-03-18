@@ -79,13 +79,15 @@ TEST_CASE("Blur", "[!benchmark]") {
         meter.measure([image]() mutable { return image.BoxBlur(32, 1); });
     };
 
-    BENCHMARK_ADVANCED("Gaussian Blur - 16 kernel size - 5 sigma")
-    (Catch::Benchmark::Chronometer meter) {
-        meter.measure([image]() mutable { return image.GaussianBlur(16, 5); });
-    };
-
-    BENCHMARK_ADVANCED("Gaussian Blur - 32 kernel size - 5 sigma")
-    (Catch::Benchmark::Chronometer meter) {
-        meter.measure([image]() mutable { return image.GaussianBlur(32, 5); });
-    };
+    // BENCHMARK_ADVANCED("Gaussian Blur - 16 kernel size - 5 sigma")
+    // (Catch::Benchmark::Chronometer meter) {
+    //     meter.measure([image]() mutable { return image.GaussianBlur(16, 5);
+    //     });
+    // };
+    //
+    // BENCHMARK_ADVANCED("Gaussian Blur - 32 kernel size - 5 sigma")
+    // (Catch::Benchmark::Chronometer meter) {
+    //     meter.measure([image]() mutable { return image.GaussianBlur(32, 5);
+    //     });
+    // };
 }

@@ -119,10 +119,10 @@ template <typename Fn>
 std::vector<float> Image::sampleSquare(int x, int y, int size, Fn weightFn) {
     std::vector<float> vals(channels);
 
-    int yStart = std::max(y - size, 0);
-    int yEnd = std::min(y + size, height - 1);
-    int xStart = std::max(x - size, 0);
-    int xEnd = std::min(x + size, width - 1);
+    int yStart = std::max(y - size / 2, 0);
+    int yEnd = std::min(y + size / 2, height - 1);
+    int xStart = std::max(x - size / 2, 0);
+    int xEnd = std::min(x + size / 22, width - 1);
 
     // accumulate the pixel values
     float weights = 0.0;
@@ -145,15 +145,76 @@ std::vector<float> Image::sampleSquare(int x, int y, int size, Fn weightFn) {
 };
 
 void Image::BoxBlur(int size, int passes) {
+    size = size / 2;
+    int total = height * width * channels;
     for (int pass = 0; pass < passes; ++pass) {
-        stbi_uc* output =
-            static_cast<stbi_uc*>(malloc(height * width * channels));
+        stbi_uc* horizontal = static_cast<stbi_uc*>(malloc(total));
+
+        // horizontal pass
         for (int y = 0; y < height; ++y) {
+            int vals[4] = {};
+            for (int i = 0; i < std::min(size, width); ++i) {
+                for (int k = 0; k < channels; ++k) {
+                    vals[k] += pixels[(y * width + i) * channels + k];
+                }
+            }
+
             for (int x = 0; x < width; ++x) {
-                std::vector<float> sample =
-                    sampleSquare(x, y, size, [](int x, int y) { return 1; });
-                for (int i = 0; i < channels; ++i) {
-                    output[(y * width + x) * channels + i] = sample[i];
+                int xEnd = x + size;
+                int xStart = x - size;
+                int windowSize =
+                    (std::min(xEnd, width - 1) - std::max(xStart, 0) + 1);
+
+                for (int k = 0; k < channels; ++k) {
+                    if (xEnd < width) {
+                        vals[k] += pixels[(y * width + xEnd) * channels + k];
+                    }
+
+                    if (xStart - 1 >= 0) {
+                        vals[k] -=
+                            pixels[(y * width + xStart - 1) * channels + k];
+                    }
+                }
+
+                for (int k = 0; k < channels; ++k) {
+                    horizontal[(y * width + x) * channels + k] =
+                        vals[k] / windowSize;
+                }
+            }
+        }
+
+        pixels.reset(horizontal);
+        stbi_uc* output = static_cast<stbi_uc*>(malloc(total));
+
+        // veritcal pass
+        for (int x = 0; x < width; ++x) {
+            int vals[4] = {};
+
+            for (int j = 0; j < std::min(size, height); ++j) {
+                for (int k = 0; k < channels; ++k) {
+                    vals[k] += pixels[(j * width + x) * channels + k];
+                }
+            }
+
+            for (int y = 0; y < height; ++y) {
+                int yEnd = y + size;
+                int yStart = y - size;
+                int windowSize =
+                    (std::min(yEnd, height - 1) - std::max(yStart, 0) + 1);
+
+                for (int k = 0; k < channels; ++k) {
+                    if (yEnd < height) {
+                        vals[k] += pixels[(yEnd * width + x) * channels + k];
+                    }
+                    if (yStart - 1 >= 0) {
+                        vals[k] -=
+                            pixels[((yStart - 1) * width + x) * channels + k];
+                    }
+                }
+
+                for (int k = 0; k < channels; ++k) {
+                    output[(y * width + x) * channels + k] =
+                        vals[k] / windowSize;
                 }
             }
         }
