@@ -1,7 +1,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "image.h"
-#include "stb_image_write.h"
+#include <stb_image_write.h>
 
 #include <algorithm>
 #include <cstdlib>
@@ -22,7 +22,7 @@ Image::Image(const std::filesystem::path& path)
 
 Image::Image(std::unique_ptr<stbi_uc[], decltype(&stbi_image_free)> img,
              int height, int width, int channels)
-    : pixels(std::move(img)), height(height), width(width), channels(channels) {
+    : height(height), width(width), channels(channels), pixels(std::move(img)) {
 }
 
 Image::Image(const Image& other)

@@ -4,32 +4,27 @@ project(sit)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-add_compile_options(-O3)
+
+include(FetchContent)
 
 add_subdirectory(src)
 
-include(FetchContent)
+if (BENCHMARK OR TEST) 
+    FetchContent_Declare(
+      Catch2
+      GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+      GIT_TAG        v3.8.1
+    )
 
-FetchContent_Declare(
-    stb
-    GIT_REPOSITORY https://github.com/nothings/stb.git
-    GIT_TAG        master
-)
-FetchContent_MakeAvailable(stb)
-add_library(stb_image INTERFACE)
-target_include_directories(stb_image INTERFACE ${stb_SOURCE_DIR})
+    FetchContent_MakeAvailable(Catch2)
 
-include(FetchContent)
-FetchContent_Declare(
-    cli11_proj
-    QUIET
-    GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
-    GIT_TAG v2.6.2
-)
-
-FetchContent_MakeAvailable(cli11_proj)
+    enable_testing()
+endif()
 
 if (TEST)
-    enable_testing()
     add_subdirectory(tests)
+endif()
+
+if (BENCHMARK)
+    add_subdirectory(benchmarks)
 endif()

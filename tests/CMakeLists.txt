@@ -1,19 +1,5 @@
-Include(FetchContent)
-
-FetchContent_Declare(
-  Catch2
-  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG        v3.8.1
-)
-
-FetchContent_MakeAvailable(Catch2)
-
 add_executable(tests 
-  image.cpp
-)
-
-target_compile_definitions(tests PRIVATE
-    TEST_FIXTURES_DIR="${CMAKE_SOURCE_DIR}/tests/fixtures"
+  image_tests.cpp
 )
 
 target_link_libraries(tests PRIVATE core)

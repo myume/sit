@@ -9,7 +9,7 @@ You can run benchmarks with `make benchmark`.
 By applying the N by N kernel to each pixel, we can blur an image in
 `O(height * width * n^2)`.
 
-![Naive](./naive.png)
+![Naive](./screenshots/naive.png)
 
 ### 2 Pass implementation
 
@@ -19,7 +19,7 @@ each direction. (not so obvious, proof is required to show they are equivalent).
 In this case, we only need to apply a 1D kernel (of size N), once in each
 direction, which is `O(height * width * n)`.
 
-![2Pass](./two-pass.png)
+![2Pass](./screenhots/two-pass.png)
 
 We get a pretty significant speedup here.
 
