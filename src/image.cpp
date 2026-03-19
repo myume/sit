@@ -1,3 +1,4 @@
+#include <print>
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "image.h"
@@ -184,7 +185,7 @@ void Image::BoxBlur(int size, int passes) {
         }
 
         pixels.reset(horizontal);
-        stbi_uc* output = static_cast<stbi_uc*>(malloc(total));
+        stbi_uc* vertical = static_cast<stbi_uc*>(malloc(total));
 
         // veritcal pass
         for (int x = 0; x < width; ++x) {
@@ -213,31 +214,70 @@ void Image::BoxBlur(int size, int passes) {
                 }
 
                 for (int k = 0; k < channels; ++k) {
-                    output[(y * width + x) * channels + k] =
+                    vertical[(y * width + x) * channels + k] =
                         vals[k] / windowSize;
                 }
             }
         }
-        pixels.reset(output);
+        pixels.reset(vertical);
     }
 };
 
-inline float gaussian(float x, float y, float sigma) {
-    return exp(-(x * x + y * y) / (2 * sigma * sigma));
+inline float gaussian(float x, float sigma) {
+    return exp(-(x * x) / (2 * sigma * sigma));
 }
 
 void Image::GaussianBlur(int size, float sigma) {
-    stbi_uc* output = static_cast<stbi_uc*>(malloc(height * width * channels));
+    size = size / 2;
+    int total = height * width * channels;
+    stbi_uc* horizontal = static_cast<stbi_uc*>(malloc(total));
+
+    std::vector<float> kernel(2 * size + 1);
+    float weights = 0.0;
+    for (int i = -size; i <= size; ++i) {
+        float weight = gaussian(i, sigma);
+        kernel[i + size] = weight;
+        weights += weight;
+    }
+
+    // horizontal pass
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            std::vector<float> sample =
-                sampleSquare(x, y, size, [&x, &y, &sigma](int i, int j) {
-                    return gaussian(x - i, y - j, sigma);
-                });
-            for (int i = 0; i < channels; ++i) {
-                output[(y * width + x) * channels + i] = sample[i];
+            float vals[4] = {};
+            for (int i = std::max(x - size, 0);
+                 i <= std::min(x + size, width - 1); ++i) {
+                for (int k = 0; k < channels; ++k) {
+                    vals[k] += kernel[i - x + size] *
+                               pixels[(y * width + i) * channels + k];
+                }
+            }
+
+            for (int k = 0; k < channels; ++k) {
+                horizontal[(y * width + x) * channels + k] = vals[k] / weights;
             }
         }
     }
-    pixels.reset(output);
+
+    pixels.reset(horizontal);
+    stbi_uc* vertical = static_cast<stbi_uc*>(malloc(total));
+
+    // veritcal pass
+    for (int x = 0; x < width; ++x) {
+        for (int y = 0; y < height; ++y) {
+            float vals[4] = {};
+
+            for (int i = std::max(y - size, 0);
+                 i <= std::min(y + size, height - 1); ++i) {
+                for (int k = 0; k < channels; ++k) {
+                    vals[k] += kernel[i - y + size] *
+                               pixels[(i * width + x) * channels + k];
+                }
+            }
+
+            for (int k = 0; k < channels; ++k) {
+                vertical[(y * width + x) * channels + k] = vals[k] / weights;
+            }
+        }
+    }
+    pixels.reset(vertical);
 };
