@@ -11,7 +11,7 @@ class Image {
     explicit Image(const std::filesystem::path& path);
 
     Image(const Image& other);
-    Image operator=(const Image& other);
+    Image& operator=(const Image& other);
 
     explicit Image(
         std::unique_ptr<stbi_uc[], decltype(&stbi_image_free)> pixels,

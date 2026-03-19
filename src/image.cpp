@@ -33,7 +33,15 @@ Image::Image(const Image& other)
     memcpy(pixels.get(), other.pixels.get(), height * width * channels);
 };
 
-Image Image::operator=(const Image& other) { return Image(other); };
+Image& Image::operator=(const Image& other) {
+    pixels.reset(static_cast<stbi_uc*>(
+        malloc(other.height * other.width * other.channels)));
+    height = other.height;
+    width = other.width;
+    channels = other.channels;
+    memcpy(pixels.get(), other.pixels.get(), height * width * channels);
+    return *this;
+};
 
 int Image::Width() const { return width; };
 
