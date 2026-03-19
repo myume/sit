@@ -203,22 +203,22 @@ void Image::GaussianBlur(int size, float sigma) {
     stbi_uc* horizontal = static_cast<stbi_uc*>(malloc(total));
 
     std::vector<float> kernel(2 * size + 1);
-    float weights = 0.0;
     for (int i = -size; i <= size; ++i) {
         float weight = gaussian(i, sigma);
         kernel[i + size] = weight;
-        weights += weight;
     }
 
     // horizontal pass
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             float vals[4] = {};
+            float weights = 0.0;
             for (int i = std::max(x - size, 0);
                  i <= std::min(x + size, width - 1); ++i) {
+                float w = kernel[i - x + size];
+                weights += w;
                 for (int k = 0; k < channels; ++k) {
-                    vals[k] += kernel[i - x + size] *
-                               pixels[(y * width + i) * channels + k];
+                    vals[k] += w * pixels[(y * width + i) * channels + k];
                 }
             }
 
@@ -235,12 +235,13 @@ void Image::GaussianBlur(int size, float sigma) {
     for (int x = 0; x < width; ++x) {
         for (int y = 0; y < height; ++y) {
             float vals[4] = {};
-
+            float weights = 0.0;
             for (int i = std::max(y - size, 0);
                  i <= std::min(y + size, height - 1); ++i) {
+                float w = kernel[i - y + size];
+                weights += w;
                 for (int k = 0; k < channels; ++k) {
-                    vals[k] += kernel[i - y + size] *
-                               pixels[(i * width + x) * channels + k];
+                    vals[k] += w * pixels[(i * width + x) * channels + k];
                 }
             }
 
