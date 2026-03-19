@@ -35,6 +35,8 @@ class Image {
 
     void GaussianBlur(int size, float sigma);
 
+    void KawaseBlur(int passes);
+
     void Save(const std::filesystem::path& path);
 
   private:
@@ -50,6 +52,7 @@ enum class Transformation {
     RotateRight,
     BoxBlur,
     GaussianBlur,
+    KawaseBlur,
 };
 
 inline Transformation parseTransformation(std::string_view s) {
@@ -60,6 +63,7 @@ inline Transformation parseTransformation(std::string_view s) {
             {"horizontal_flip", Transformation::HorizontalFlip},
             {"box_blur", Transformation::BoxBlur},
             {"gaussian_blur", Transformation::GaussianBlur},
+            {"kawase_blur", Transformation::KawaseBlur},
         };
 
     if (!mapping.contains(s)) {

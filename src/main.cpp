@@ -54,6 +54,9 @@ int main(int argc, char** argv) {
             case Transformation::GaussianBlur:
                 image.GaussianBlur(blurSize, blurSigma);
                 break;
+            case Transformation::KawaseBlur:
+                image.KawaseBlur(blurPasses);
+                break;
             }
         } catch (std::exception& e) {
             std::println(stderr, "{}", e.what());

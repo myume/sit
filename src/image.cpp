@@ -260,3 +260,39 @@ void Image::GaussianBlur(int size, float sigma) {
     }
     pixels.reset(vertical);
 };
+
+void Image::KawaseBlur(int passes) {
+    for (int pass = 1; pass <= passes; ++pass) {
+        stbi_uc* output =
+            static_cast<stbi_uc*>(malloc(width * height * channels));
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                float vals[4] = {};
+                int weights = 0;
+
+                for (int i = -1; i <= 1; i += 2) {
+                    int row = y + i * pass;
+                    if (row >= height || row < 0) {
+                        continue;
+                    }
+                    for (int j = -1; j <= 1; j += 2) {
+                        int col = x + j * pass;
+                        if (col < 0 || col >= width) {
+                            continue;
+                        }
+                        for (int k = 0; k < channels; ++k) {
+                            vals[k] +=
+                                pixels[(row * width + col) * channels + k];
+                        }
+                        ++weights;
+                    }
+                }
+
+                for (int k = 0; k < channels; ++k) {
+                    output[(y * width + x) * channels + k] = vals[k] / weights;
+                }
+            }
+        }
+        pixels.reset(output);
+    }
+};
