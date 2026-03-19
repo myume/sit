@@ -32,3 +32,14 @@ OPTIONS:
           --blur-pass INT     Number of blur passes
           --blur-sigma FLOAT  Sigma for gaussian blur
 ```
+
+## Benchmarks
+
+You can find benchmarks in [benchmarks](./benchmarks)
+
+## Resources
+
+An incredibly detailed and rich resource for bluring techniques. Seriously, it's
+awesome.
+
+[Video Game Blurs (and how the best one works)](https://blog.frost.kiwi/dual-kawase)
