@@ -1,4 +1,3 @@
-#include <print>
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "image.h"
@@ -114,35 +113,6 @@ void Image::Save(const std::filesystem::path& path) {
     if (!exitCode) {
         throw std::runtime_error("failed to write file");
     }
-};
-
-template <typename Fn>
-std::vector<float> Image::sampleSquare(int x, int y, int size, Fn weightFn) {
-    std::vector<float> vals(channels);
-
-    int yStart = std::max(y - size / 2, 0);
-    int yEnd = std::min(y + size / 2, height - 1);
-    int xStart = std::max(x - size / 2, 0);
-    int xEnd = std::min(x + size / 22, width - 1);
-
-    // accumulate the pixel values
-    float weights = 0.0;
-    for (int i = yStart; i <= yEnd; ++i) {
-        for (int j = xStart; j <= xEnd; ++j) {
-            float w = weightFn(j, i);
-            weights += w;
-            for (int k = 0; k < channels; ++k) {
-                vals[k] += w * pixels[(i * width + j) * channels + k];
-            }
-        }
-    }
-
-    // normalize the values
-    for (int i = 0; i < vals.size(); ++i) {
-        vals[i] = vals[i] / weights;
-    }
-
-    return vals;
 };
 
 void Image::BoxBlur(int size, int passes) {

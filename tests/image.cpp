@@ -67,7 +67,7 @@ TEST_CASE("Image Flip", "[image]") {
     }
 }
 
-TEST_CASE("Blur", "[!benchmark]") {
+TEST_CASE("Blur Benchmarks", "[!benchmark]") {
     Image image(TEST_FIXTURES_DIR "/large.jpg");
     BENCHMARK_ADVANCED("Box Blur - 16 kernel size - 1 Pass")(
         Catch::Benchmark::Chronometer meter) {

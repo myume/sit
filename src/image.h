@@ -42,9 +42,6 @@ class Image {
     int channels;
 
     std::unique_ptr<stbi_uc[], decltype(&stbi_image_free)> pixels;
-
-    template <typename Fn>
-    std::vector<float> sampleSquare(int x, int y, int size, Fn weightFn);
 };
 
 enum class Transformation {
