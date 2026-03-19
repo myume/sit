@@ -279,7 +279,7 @@ void Image::KawaseBlur(int passes) {
 
                 const int pixelIndex = (y * width + x) * channels;
                 for (int k = 0; k < channels; ++k) {
-                    output[pixelIndex] =
+                    output[pixelIndex + k] =
                         (pixels[r0c0 + k] + pixels[r0c1 + k] +
                          pixels[r1c0 + k] + pixels[r1c1 + k]) >>
                         2;
