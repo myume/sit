@@ -266,30 +266,23 @@ void Image::KawaseBlur(int passes) {
         stbi_uc* output =
             static_cast<stbi_uc*>(malloc(width * height * channels));
         for (int y = 0; y < height; ++y) {
+            const int row0 = std::clamp(y - pass, 0, height - 1);
+            const int row1 = std::clamp(y + pass, 0, height - 1);
             for (int x = 0; x < width; ++x) {
-                float vals[4] = {};
-                int weights = 0;
+                const int col0 = std::clamp(x - pass, 0, width - 1);
+                const int col1 = std::clamp(x + pass, 0, width - 1);
 
-                for (int i = -1; i <= 1; i += 2) {
-                    int row = y + i * pass;
-                    if (row >= height || row < 0) {
-                        continue;
-                    }
-                    for (int j = -1; j <= 1; j += 2) {
-                        int col = x + j * pass;
-                        if (col < 0 || col >= width) {
-                            continue;
-                        }
-                        for (int k = 0; k < channels; ++k) {
-                            vals[k] +=
-                                pixels[(row * width + col) * channels + k];
-                        }
-                        ++weights;
-                    }
-                }
+                const int r0c0 = (row0 * width + col0) * channels;
+                const int r0c1 = (row0 * width + col1) * channels;
+                const int r1c0 = (row1 * width + col0) * channels;
+                const int r1c1 = (row1 * width + col1) * channels;
 
+                const int pixelIndex = (y * width + x) * channels;
                 for (int k = 0; k < channels; ++k) {
-                    output[(y * width + x) * channels + k] = vals[k] / weights;
+                    output[pixelIndex] =
+                        (pixels[r0c0 + k] + pixels[r0c1 + k] +
+                         pixels[r1c0 + k] + pixels[r1c1 + k]) >>
+                        2;
                 }
             }
         }
