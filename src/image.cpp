@@ -143,16 +143,12 @@ void Image::BoxBlur(int size, int passes) {
                 int xStart = x - size;
                 int windowSize =
                     (std::min(xEnd, width - 1) - std::max(xStart, 0) + 1);
-
+                int endIndex = (y * width + xEnd * (xEnd < width)) * channels;
+                int startIndex =
+                    (y * width + (xStart - 1) * (xStart - 1 >= 0)) * channels;
                 for (int k = 0; k < channels; ++k) {
-                    if (xEnd < width) {
-                        vals[k] += pixels[(y * width + xEnd) * channels + k];
-                    }
-
-                    if (xStart - 1 >= 0) {
-                        vals[k] -=
-                            pixels[(y * width + xStart - 1) * channels + k];
-                    }
+                    vals[k] += (xEnd < width) * pixels[endIndex + k];
+                    vals[k] -= (xStart - 1 >= 0) * pixels[startIndex + k];
                 }
 
                 for (int k = 0; k < channels; ++k) {
@@ -181,14 +177,12 @@ void Image::BoxBlur(int size, int passes) {
                 int windowSize =
                     (std::min(yEnd, height - 1) - std::max(yStart, 0) + 1);
 
+                int endIndex = ((yEnd < height) * yEnd * width + x) * channels;
+                int startIndex =
+                    ((yStart - 1 >= 0) * (yStart - 1) * width + x) * channels;
                 for (int k = 0; k < channels; ++k) {
-                    if (yEnd < height) {
-                        vals[k] += pixels[(yEnd * width + x) * channels + k];
-                    }
-                    if (yStart - 1 >= 0) {
-                        vals[k] -=
-                            pixels[((yStart - 1) * width + x) * channels + k];
-                    }
+                    vals[k] += (yEnd < height) * pixels[endIndex + k];
+                    vals[k] -= (yStart - 1 >= 0) * pixels[startIndex + k];
                 }
 
                 for (int k = 0; k < channels; ++k) {
