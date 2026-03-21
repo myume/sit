@@ -28,6 +28,5 @@ if (TEST)
 endif()
 
 if (BENCHMARK)
-    add_compile_options(-O3)
     add_subdirectory(benchmarks)
 endif()

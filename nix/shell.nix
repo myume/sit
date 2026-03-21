@@ -4,6 +4,7 @@
   clang-tools,
   cmake,
   codespell,
+  ninja,
 }:
 mkShell.override
 {
@@ -13,5 +14,6 @@ mkShell.override
     clang-tools
     cmake
     codespell
+    ninja
   ];
 }
