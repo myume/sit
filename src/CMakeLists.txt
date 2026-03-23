@@ -17,18 +17,20 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(cli11_proj)
 
 add_executable(sit main.cpp)
-add_library(core STATIC
+add_library(libsit STATIC
     image.cpp
     image.h
 )
 
-target_compile_options(core PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_options(libsit PRIVATE -Wall -Wextra -Wpedantic)
 target_compile_options(sit PRIVATE -Wall -Wextra -Wpedantic)
 
-target_link_libraries(sit PRIVATE core)
+target_link_libraries(sit PRIVATE libsit)
 target_link_libraries(sit PRIVATE CLI11::CLI11)
 
-target_link_libraries(core PUBLIC stb_image)
+target_link_libraries(libsit PUBLIC stb_image)
 
-target_include_directories(core SYSTEM PUBLIC ${stb_SOURCE_DIR})
-target_include_directories(core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+set_target_properties(libsit PROPERTIES PREFIX "")
+
+target_include_directories(libsit SYSTEM PUBLIC ${stb_SOURCE_DIR})
+target_include_directories(libsit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
