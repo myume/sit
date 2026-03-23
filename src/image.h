@@ -37,6 +37,8 @@ class Image {
 
     void KawaseBlur(int passes);
 
+    void DualKawaseBlur(int passes);
+
     void Save(const std::filesystem::path& path);
 
   private:
@@ -53,6 +55,7 @@ enum class Transformation {
     BoxBlur,
     GaussianBlur,
     KawaseBlur,
+    DualKawaseBlur,
 };
 
 inline Transformation parseTransformation(std::string_view s) {
@@ -64,6 +67,7 @@ inline Transformation parseTransformation(std::string_view s) {
             {"box_blur", Transformation::BoxBlur},
             {"gaussian_blur", Transformation::GaussianBlur},
             {"kawase_blur", Transformation::KawaseBlur},
+            {"dual_kawase_blur", Transformation::DualKawaseBlur},
         };
 
     if (!mapping.contains(s)) {

@@ -1,3 +1,4 @@
+#include <cmath>
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "image.h"
@@ -281,5 +282,92 @@ void Image::KawaseBlur(int passes) {
             }
         }
         pixels.reset(output);
+    }
+};
+
+void Image::DualKawaseBlur(int passes) {
+    std::vector<stbi_uc*> samples{pixels.get()};
+    samples.reserve(passes + 1);
+
+    // downsample passes
+    int prev_width = width;
+    int prev_height = height;
+    for (int pass = 1; pass <= passes; ++pass) {
+        int downsample_width = prev_width >> 1;
+        int downsample_height = prev_height >> 1;
+        stbi_uc* downsample = static_cast<stbi_uc*>(
+            malloc(downsample_width * downsample_height * channels));
+        samples.push_back(downsample);
+
+        for (int y = 0; y < downsample_height; ++y) {
+            const int row0 = std::clamp(2 * y - 1, 0, prev_height - 1);
+            const int row1 = std::clamp(2 * y + 1, 0, prev_height - 1);
+            for (int x = 0; x < downsample_width; ++x) {
+                const int col0 = std::clamp(2 * x - 1, 0, prev_width - 1);
+                const int col1 = std::clamp(2 * x + 1, 0, prev_width - 1);
+
+                const int r0c0 = (row0 * prev_width + col0) * channels;
+                const int r0c1 = (row0 * prev_width + col1) * channels;
+                const int r1c0 = (row1 * prev_width + col0) * channels;
+                const int r1c1 = (row1 * prev_width + col1) * channels;
+                const int center = (2 * y * prev_width + 2 * x) * channels;
+
+                for (int k = 0; k < channels; ++k) {
+                    downsample[(y * downsample_width + x) * channels + k] =
+                        ((samples[pass - 1][center + k] << 2) +
+                         samples[pass - 1][r0c0 + k] +
+                         samples[pass - 1][r0c1 + k] +
+                         samples[pass - 1][r1c0 + k] +
+                         samples[pass - 1][r1c1 + k]) >>
+                        3;
+                }
+            }
+        }
+
+        prev_width = downsample_width;
+        prev_height = downsample_height;
+    }
+
+    // upscaling passes
+    for (int i = passes - 1; i >= 0; --i) {
+        auto sample = samples[i];
+        int upscaled_height = height / (1 << i);
+        int upscaled_width = width / (1 << i);
+        for (int y = 0; y < upscaled_height; ++y) {
+            for (int x = 0; x < upscaled_width; ++x) {
+                const int base_row = y >> 1;
+                const int base_col = x >> 1;
+                const int down_height = upscaled_height >> 1;
+                const int down_width = upscaled_width >> 1;
+
+                const int row0 = std::clamp(base_row - 1, 0, down_height - 1);
+                const int row1 = std::clamp(base_row + 1, 0, down_height - 1);
+                const int col0 = std::clamp(base_col - 1, 0, down_width - 1);
+                const int col1 = std::clamp(base_col + 1, 0, down_width - 1);
+
+                const int tl = (row0 * down_width + col0) * channels;
+                const int bl = (row1 * down_width + col0) * channels;
+                const int tr = (row0 * down_width + col1) * channels;
+                const int br = (row1 * down_width + col1) * channels;
+
+                const int t = (row0 * down_width + base_col) * channels;
+                const int b = (row1 * down_width + base_col) * channels;
+                const int l = (base_row * down_width + col0) * channels;
+                const int r = (base_row * down_width + col1) * channels;
+
+                for (int k = 0; k < channels; ++k) {
+                    sample[(y * upscaled_width + x) * channels + k] =
+                        (samples[i + 1][tl + k] + samples[i + 1][bl + k] +
+                         samples[i + 1][tr + k] + samples[i + 1][br + k] +
+                         samples[i + 1][t + k] + samples[i + 1][b + k] +
+                         samples[i + 1][l + k] + samples[i + 1][r + k]) >>
+                        3;
+                }
+            }
+        }
+    }
+
+    for (size_t i = 1; i < samples.size(); ++i) {
+        free(samples[i]);
     }
 };

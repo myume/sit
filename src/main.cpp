@@ -57,6 +57,9 @@ int main(int argc, char** argv) {
             case Transformation::KawaseBlur:
                 image.KawaseBlur(blurPasses);
                 break;
+            case Transformation::DualKawaseBlur:
+                image.DualKawaseBlur(blurPasses);
+                break;
             }
         } catch (std::exception& e) {
             std::println(stderr, "{}", e.what());

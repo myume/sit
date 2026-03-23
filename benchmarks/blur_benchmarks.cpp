@@ -52,3 +52,17 @@ TEST_CASE("Kawase Blur Benchmarks", "[!benchmark][kawase]") {
         };
     }
 }
+
+TEST_CASE("Dual Kawase Blur Benchmarks", "[!benchmark][dual]") {
+    Image image(TEST_FIXTURES_DIR "/large.jpg");
+
+    for (int passes : {1, 2, 4, 8, 16}) {
+        BENCHMARK_ADVANCED(
+            ("Dual Kawase Blur - " + std::to_string(passes) + " Pass").c_str())(
+            Catch::Benchmark::Chronometer meter) {
+            meter.measure([image, passes]() mutable {
+                return image.DualKawaseBlur(passes);
+            });
+        };
+    }
+}
